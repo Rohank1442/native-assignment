@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, FlatList, ActivityIndicator, Text } from "react-native";
 import axios from "axios";
+import JobCard from "../components/JobCard";
+import { saveBookmark } from "../utils/useBookmarks";
 
 export default function JobsScreen({ navigation }) {
   const [jobs, setJobs] = useState([]);
+  const [bookmarkedJobs, setBookmarkedJobs] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -11,11 +14,24 @@ export default function JobsScreen({ navigation }) {
     fetchJobs();
   }, [page]);
 
+  useEffect(() => {
+
+    const fetchBookmarks = async () => {
+      const savedBookmarks = await getBookmarks();
+      setBookmarkedJobs(savedBookmarks);
+    };
+
+    fetchBookmarks();
+  }, []);
+
   const fetchJobs = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`https://testapi.getlokalapp.com/common/jobs?page=${page}`);
-      setJobs((prev) => [...prev, ...response.data.data]);
+      const response = await axios.get(
+        `https://testapi.getlokalapp.com/common/jobs?page=${page}`
+      );
+      const jobResults = response.data.results || [];
+      setJobs((prev) => [...prev, ...jobResults]);
     } catch (error) {
       console.error("Error fetching jobs:", error);
     } finally {
@@ -27,29 +43,34 @@ export default function JobsScreen({ navigation }) {
     setPage((prev) => prev + 1);
   };
 
+  const handleBookmark = async (job) => {
+    await saveBookmark(job);
+    setBookmarkedJobs((prev) => [...prev, job]);
+  };
+
   return (
-    <View style={{ flex: 1, padding: 10 }}>
+    <View style={{ flex: 1, padding: 10, backgroundColor: "#fff" }}>
       {jobs.length === 0 && !loading ? (
         <Text>No jobs available. Pull down to refresh.</Text>
       ) : (
         <FlatList
           data={jobs}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item, index) =>
+            item.id ? item.id.toString() : index.toString()
+          }
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => navigation.navigate("JobDetails", { job: item })}>
-              <View style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: "#ccc" }}>
-                <Text>{item.title}</Text>
-                <Text>{item.location}</Text>
-                <Text>{item.salary}</Text>
-                <Text>{item.phone}</Text>
-              </View>
-            </TouchableOpacity>
+            <JobCard
+              job={item}
+              onPress={() => navigation.navigate("JobDetails", { job: item })}
+              isBookmarked={bookmarkedJobs.some((job) => job.id === item.id)}
+              onBookmark={() => handleBookmark(item)}
+            />
           )}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={loading ? <ActivityIndicator /> : null}
+          ListFooterComponent={loading ? <ActivityIndicator size="large" /> : null}
         />
       )}
     </View>
-  );  
+  );
 }
