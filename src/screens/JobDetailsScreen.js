@@ -1,11 +1,12 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 
 const JobDetailsScreen = ({ route }) => {
   const { job } = route.params;
+  console.log("hello");
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{paddingHorizontal: 8, paddingVertical: 10}}>
       <Text style={styles.title}>{job.title}</Text>
       <Text style={styles.detail}>What we do: {job.company_name || "N/A"}</Text>
       <Text style={styles.detail}>Job Role: {job.job_role || "N/A"}</Text>
@@ -15,14 +16,13 @@ const JobDetailsScreen = ({ route }) => {
       <Text style={styles.description}>
         {job.description || "No additional description available."}
       </Text>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: "#f3f4f6",
   },
   title: {
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     color: "#475569",
-    marginTop: 25,
+    marginTop: 20,
     lineHeight: 26,
     padding: 20,
     backgroundColor: "#fff",

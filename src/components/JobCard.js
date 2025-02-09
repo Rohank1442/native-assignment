@@ -1,40 +1,40 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert, TouchableNativeFeedback } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 
 const JobCard = ({ job, onPress, isBookmarked, onBookmark }) => {
   return (
-    <View style={styles.card}>
-      <Text style={styles.title}>{job.title}</Text>
-      <Text style={styles.detail}>Location: {job.job_location_slug || "N/A"}</Text>
-      <Text style={styles.detail}>Salary: {job.salary_min || "N/A"}</Text>
-      <Text style={styles.detail}>Phone: {job.whatsapp_no || "N/A"}</Text>
+    <TouchableOpacity style={styles.card} onPress={onPress}>
+      <View style={{
+        flexDirection: "row",
+        columnGap: 10
+      }}>
+        <Text style={styles.title}>{job.title??"N/A"}</Text>
+        <TouchableNativeFeedback>
+          <TouchableOpacity
+            style={styles.bookmarkButton}
+            onPress={() => {
+              if (!isBookmarked) {
+                onBookmark();
+              }
+            }}
+            disabled={isBookmarked}
+          >
 
-      <View style={styles.iconContainer}>
-        <TouchableOpacity
-          style={styles.bookmarkButton}
-          onPress={() => {
-            if (!isBookmarked) {
-              onBookmark();
-            }
-          }}
-          disabled={isBookmarked}
-        >
-
-          <Ionicons
-            name={isBookmarked ? "bookmark" : "bookmark-outline"}
-            size={24}
-            color="red"
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={onPress}
-        >
-          <Ionicons name="ios-eye" size={24} color="blue" />
-        </TouchableOpacity>
+            <Ionicons
+              name={isBookmarked ? "bookmark" : "bookmark-outline"}
+              size={24}
+              color="red"
+            />
+          </TouchableOpacity>
+        </TouchableNativeFeedback>
       </View>
-    </View>
+      <View>
+        <Text style={styles.detail}>Location: {job.job_location_slug || "N/A"}</Text>
+        <Text style={styles.detail}>Salary: {job.salary_min || "N/A"}</Text>
+        <Text style={styles.detail}>Phone: {job.whatsapp_no || "N/A"}</Text>
+      </View>
+    </TouchableOpacity>
   );
 };
 
@@ -46,10 +46,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#ccc",
+    flexDirection: "column",
+    rowGap: 5
   },
   title: {
     fontSize: 18,
     fontWeight: "bold",
+    flex: 1
   },
   location: {
     fontSize: 16,
